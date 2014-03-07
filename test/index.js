@@ -110,7 +110,7 @@ describe('Two different timers.', function () {
 			min: 0,
 			rate: 1 / 100, // 1 hp per 100ms.
 			val: 10000
-		}
+		};
 
 		tvHP = new TimedNumber(hp);
 		tvHP.now = function () { return Date.now(); };
@@ -126,5 +126,23 @@ describe('Two different timers.', function () {
 	it('Waiting 100ms increases the TimedNumber by 1.', function (done) {
 		var beforeWait = Date.now();
 		setTimeout(function () { assert.equal(9001, tvHP.get()); done(); }, 100);
+	});
+});
+
+describe('Ticking', function () {
+	it('Listen for a tick event', function (done) {
+		var hp = {
+			max: 10000,
+			min: 0,
+			rate: 1 / 100, // 1 hp per 100ms
+			val: 1000,
+			interval: 1
+		};
+
+		var tvHP = new TimedNumber(hp);
+		tvHP.once('tick', function (value) {
+			assert(value, 1010);
+			done();
+		});
 	});
 });

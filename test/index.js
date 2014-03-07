@@ -134,9 +134,15 @@ describe('Ticking', function () {
 		var hp = {
 			max: 10000,
 			min: 0,
-			rate: 1 / 1000,
-			val: 1000
+			rate: 1 / 100, // 1 hp per 100ms
+			val: 1000,
+			interval: 1
 		};
 
+		var tvHP = new TimedNumber(hp);
+		tvHP.once('tick', function (value) {
+			assert(value, 1010);
+			done();
+		});
 	});
 });

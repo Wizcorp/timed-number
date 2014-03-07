@@ -34,7 +34,7 @@ var TimedNumber = function (tSource) {
 	}
 
 	this.now = function () {
-		return Date.now() / 1000 << 0;	
+		return Date.now() / 1000 << 0;
 	};
 
 	var tValue = this.source = tSource;
@@ -75,12 +75,16 @@ var TimedNumber = function (tSource) {
 		this.set(this.get() + value);
 	};
 
+	var that = this;
+
+	function tick() {
+		that.emit('tick', that.get());
+		lastTick = that.now();
+	}
+
 	var ticker, lastTick;
 	if (interval) {
-		ticket = setInterval(function () {
-			this.emit('tick', this.get());
-			lastTick = now();
-		}, interval * 1000);
+		ticker = setInterval(tick, interval * 1000);
 	}
 
 	this.nextTick = function () {

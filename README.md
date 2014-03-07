@@ -13,7 +13,8 @@ var hp = {
 	max: 10,
 	min: 0,
 	rate: 1 / 1, // goes up by one every second
-	val: 3
+	val: 3,
+	interval: 1 // how often the timed number will tick in seconds.
 };
 
 var tnHP = new TimedNumber(hp);
@@ -55,6 +56,9 @@ The minimum value this number can be. Defaults to -Infinity.
 
 ####rate
 The amount to change the value per period of time. Defaults to 0.
+
+####interval
+The amount of time between ticks, in seconds. Defaults to 1.
 
 ####val
 The value of the number at the time of the last update.

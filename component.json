@@ -2,9 +2,9 @@
   "name": "timed-number",
   "repo": "Wizcorp/timed-number",
   "description": "A little wrapper to help deal with numbers that change over time.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "dependencies": {
-  	"component/emitter": "*"
+  	"component/emitter": "1.1.0"
   },
   "scripts": [
     "index.js"

@@ -42,7 +42,7 @@ var TimedNumber = function (tSource, ticks) {
 	var rate = this.rate = tValue.hasOwnProperty('rate') ? tValue.rate : 0;
 	var interval = this.interval = tValue.hasOwnProperty('interval') ? tValue.interval : 1;
 
-	var lastTick = this.lasTick = function () {
+	var lastTick = this.lastTick = function () {
 		return that.now() - (that.now() - that.last) % interval;
 	};
 

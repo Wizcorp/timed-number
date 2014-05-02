@@ -10,6 +10,7 @@ Example usage:
 var TimedNumber = require('timed-number');
 
 var hp = {
+	interval: 1,
 	max: 10,
 	min: 0,
 	rate: 1 / 1, // goes up by one every second
@@ -44,6 +45,16 @@ can override this function.
 Sets the TimedNumber to the **value** provided. If the value would be outside of the bounds set by
 max and min, the max or min is set instead.
 
+####nextTick()
+Returns in unix time when the next tick will triggered
+
+####lastTick()
+Returns in unix time when the last tick got triggered
+
+####finalTick()
+Returns in unix time when the final tick will triggered, meaning when the value get to its max/min
+
+
 ###Properties:
 ####last
 The last time this number was updated. Defaults to 0.
@@ -55,7 +66,7 @@ The maximum value this number can be. Defaults to Infinity.
 The minimum value this number can be. Defaults to -Infinity.
 
 ####rate
-The amount to change the value per period of time. Defaults to 0.
+The amount to change the value per tick. Defaults to 0.
 
 ####interval
 The amount of time between ticks, in seconds. Defaults to 1.

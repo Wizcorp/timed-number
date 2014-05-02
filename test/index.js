@@ -3,6 +3,8 @@ var Tome = require('tomes').Tome;
 
 var TimedNumber = require('..');
 
+var time = 1234567890;
+
 describe('Timed Values', function () {
 	it('throws when trying to instantiate with nothing', function () {
 		assert.throws(function () {
@@ -19,9 +21,10 @@ describe('Timed Values', function () {
 	});
 
 	var testForce = {
+		interval: 60 * 30,
 		max: 3,
 		min: 0,
-		rate: 1 / (30 * 60),
+		rate: 1,
 		val: 3
 	};
 
@@ -53,67 +56,68 @@ describe('Timed Values', function () {
 	})
 
 	it('Setting the value updates the last property to the current time received from the now function.', function () {
-		tvForce.now = function () { return 1234567890; };
+		tvForce.now = function () { return time; };
 		tvForce.set(0);
-		assert.equal(1234567890, tForce.last);
+		assert.equal(time, tForce.last);
 	});
 
 	it('Getting the value 10 seconds later should result in the same value.', function () {
-		tvForce.now = function () { return 1234567890; };
+		tvForce.now = function () { return time; };
 		var previousValue = tvForce.get();
-		tvForce.now = function () { return 1234567890 + 10; };
+		tvForce.now = function () { return time + 10; };
 		assert.equal(previousValue, tvForce.get());
 	});
 
 	it('Getting the value 30 minutes later should result in an increase by one.', function () {
-		tvForce.now = function () { return 1234567890; };
+		tvForce.now = function () { return time; };
 		var previousValue = tvForce.get();
-		tvForce.now = function () { return 1234567890 + 30 * 60; };
+		tvForce.now = function () { return time + 30 * 60; };
 		assert.equal(previousValue + 1, tvForce.get());
 	});
 
 	it('Getting the value 60 minutes later should result in an increase by two.', function () {
-		tvForce.now = function () { return 1234567890; };
+		tvForce.now = function () { return time; };
 		var previousValue = tvForce.get();
-		tvForce.now = function () { return 1234567890 + 60 * 60; };
+		tvForce.now = function () { return time + 60 * 60; };
 		assert.equal(previousValue + 2, tvForce.get());
 	});
 
 	it('Getting the value 90 minutes later should result in an increase by three.', function () {
-		tvForce.now = function () { return 1234567890; };
+		tvForce.now = function () { return time; };
 		var previousValue = tvForce.get();
-		tvForce.now = function () { return 1234567890 + 90 * 60; };
+		tvForce.now = function () { return time + 90 * 60; };
 		assert.equal(previousValue + 3, tvForce.get());
 	});
 
 	it('Getting the value 2 hours later should result in an increase by three.', function () {
-		tvForce.now = function () { return 1234567890; };
+		tvForce.now = function () { return time; };
 		var previousValue = tvForce.get();
-		tvForce.now = function () { return 1234567890 + 2 * 60 * 60; };
+		tvForce.now = function () { return time + 2 * 60 * 60; };
 		assert.equal(previousValue + 3, tvForce.get());
 	});
 
 	it('Getting the value 1 week later should result in an increase by three.', function () {
-		tvForce.now = function () { return 1234567890; };
+		tvForce.now = function () { return time; };
 		var previousValue = tvForce.get();
-		tvForce.now = function () { return 1234567890 + 7 * 24 * 60 * 60; };
+		tvForce.now = function () { return time + 7 * 24 * 60 * 60; };
 		assert.equal(previousValue + 3, tvForce.get());
 	});
 });
 
 describe('Two different timers.', function () {
 	var hp, tvHP;
-	it('Can setup a TimedNumber that runs on milliseconds.', function () {
+	it('Can setup a TimedNumber that runs on seconds.', function () {
 		hp = {
-			last: Date.now(),
+			last: Date.now() / 1000 << 0,
+			interval: 1,
 			max: 10000,
 			min: 0,
-			rate: 1 / 100, // 1 hp per 100ms.
+			rate: 1,
 			val: 10000
-		};
+		}
 
 		tvHP = new TimedNumber(hp);
-		tvHP.now = function () { return Date.now(); };
+		tvHP.now = function () { return Date.now() / 1000 << 0; };
 
 		assert.equal(tvHP.get(), 10000);
 	});
@@ -123,26 +127,7 @@ describe('Two different timers.', function () {
 		assert.equal(tvHP.get(), 9000);
 	});
 
-	it('Waiting 100ms increases the TimedNumber by 1.', function (done) {
-		var beforeWait = Date.now();
-		setTimeout(function () { assert.equal(9001, tvHP.get()); done(); }, 100);
-	});
-});
-
-describe('Ticking', function () {
-	it('Listen for a tick event', function (done) {
-		var hp = {
-			max: 10000,
-			min: 0,
-			rate: 1 / 100, // 1 hp per 100ms
-			val: 1000,
-			interval: 1
-		};
-
-		var tvHP = new TimedNumber(hp);
-		tvHP.once('tick', function (value) {
-			assert(value, 1010);
-			done();
-		});
+	it('Waiting 1s increases the TimedNumber by 1.', function (done) {
+		setTimeout(function () { assert.equal(9001, tvHP.get()); done(); }, 1000);
 	});
 });

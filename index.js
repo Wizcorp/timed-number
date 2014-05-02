@@ -1,14 +1,4 @@
-var EventEmitter;
-
-try {
-	EventEmitter = require('emitter');
-} catch (e) {
-	EventEmitter = require('events').EventEmitter;
-}
-
-if (!EventEmitter) {
-	throw new Error('Could not find EventEmitter, TimedNumber cannot start.');
-}
+var EventEmitter = require('events').EventEmitter;
 
 function inherits(Child, Parent) {
 	Child.prototype = Object.create(Parent.prototype, {
@@ -16,7 +6,7 @@ function inherits(Child, Parent) {
 	});
 }
 
-var TimedNumber = function (tSource) {
+var TimedNumber = function (tSource, ticks) {
 	if (typeof tSource !== 'object') {
 		throw new Error('You must instantiate TimedNumber with an Object.');
 	}
@@ -45,28 +35,30 @@ var TimedNumber = function (tSource) {
 		set('last', 0);
 	}
 
+	var that = this;
 	this.last = tValue.last;
-
 	var max = this.max = tValue.hasOwnProperty('max') ? tValue.max : Infinity;
 	var min = this.min = tValue.hasOwnProperty('min') ? tValue.min : -Infinity;
 	var rate = this.rate = tValue.hasOwnProperty('rate') ? tValue.rate : 0;
-	var interval = this.interval = tValue.hasOwnProperty('interval') ? tValue.interval : 0;
+	var interval = this.interval = tValue.hasOwnProperty('interval') ? tValue.interval : 1;
+
+	var lastTick = this.lastTick = function () {
+		return that.now() - (that.now() - that.last) % interval;
+	};
 
 	if (!tValue.hasOwnProperty('val')) {
 		set('val', 0);
 	}
 
 	this.get = function () {
-		var diff = this.now() - tValue.last;
-		var calc = tValue.val + ((diff * tValue.rate) << 0); // bitwise operator is faster than Math.floor
-
-		return Math.max(tValue.min, Math.min(tValue.max, calc));
+		var diff = ((lastTick() - tValue.last) / interval) >> 0;
+		var calc = tValue.val + (diff * rate);
+		return Math.max(min, Math.min(max, calc));
 	};
 
 	this.set = function (value) {
-		newVal = Math.max(tValue.min, Math.min(tValue.max, value));
-		newLast = this.now();
-
+		var newVal = Math.max(min, Math.min(max, value));
+		var newLast = this.now();
 		set('val', newVal);
 		set('last', newLast);
 	};
@@ -75,25 +67,27 @@ var TimedNumber = function (tSource) {
 		this.set(this.get() + value);
 	};
 
-	var that = this;
+	var ticker;
 
 	function tick() {
+		clearTimeout(ticker);
 		that.emit('tick', that.get());
-		lastTick = that.now();
+		ticker = setTimeout(tick, (interval - that.now() + lastTick()) * 1000);
 	}
 
-	var ticker, lastTick;
-	if (interval) {
-		ticker = setInterval(tick, interval * 1000);
+	if (ticks) {
+		tValue.val.on('readable', tick);
+		tick();
 	}
 
 	this.nextTick = function () {
-		return lastTick + interval;
+		return lastTick() + interval;
 	};
 
 	this.finalTick = function () {
-		var direction = rate > 0 ? this.max : this.min;
-		return Math.abs((this.val - direction) / rate);
+		var direction = rate > 0 ? max : min;
+		var diff = Math.abs(tValue.val - direction);
+		return that.last + diff / rate * interval;
 	};
 };
 

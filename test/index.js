@@ -131,3 +131,68 @@ describe('Two different timers.', function () {
 		setTimeout(function () { assert.equal(9001, tvHP.get()); done(); }, 1000);
 	});
 });
+
+describe('ticks', function () {
+	it('finalTick', function () {
+		var now = Date.now() / 1000 >> 0;
+		var hp = {
+			interval: 1,
+			last: now,
+			max: 2000,
+			min: 0,
+			rate: 10, // 10 hp per 1s
+			val: 1000
+		};
+
+		var tvHP = new TimedNumber(hp);
+		assert.equal(tvHP.finalTick(), now + 100);
+	});
+
+	it('lastTick', function () {
+		var now = Date.now() / 1000 >> 0;
+		var hp = {
+			interval: 9,
+			last: now - 10,
+			max: 10000,
+			min: 0,
+			rate: 10, // 10 hp per 1s
+			val: 1000
+		};
+
+		var tvHP = new TimedNumber(hp);
+		assert.equal(tvHP.lastTick(), now - 1);
+	});
+
+	it('nextTick', function () {
+		var now = Date.now() / 1000 >> 0;
+		var hp = {
+			interval: 10,
+			last: now,
+			max: 2000,
+			min: 0,
+			rate: 10, // 10 hp per 1s
+			val: 1000
+		};
+
+		var tvHP = new TimedNumber(hp);
+		assert.equal(tvHP.nextTick(), now + 10);
+	});
+});
+
+describe('Ticking', function () {
+	it('Listen for a tick event', function (done) {
+		var hp = {
+			interval: 1,
+			max: 10000,
+			min: 0,
+			rate: 10, // 10 hp per 1s
+			val: 1000
+		};
+
+		var tvHP = new TimedNumber(hp, true);
+		tvHP.once('tick', function (value) {
+			assert(value, 1010);
+			done();
+		});
+	});
+});

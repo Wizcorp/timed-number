@@ -11,8 +11,30 @@ var TimedNumber = function (tSource, ticks) {
 		throw new Error('You must instantiate TimedNumber with an Object.');
 	}
 
-	// Detect if we're using something that has a setter, ie. tomes.
+	var ticker;
+	var that = this;
 
+	this.now = function () {
+		return Date.now() / 1000 << 0;
+	};
+
+	var lastTick = this.lastTick = function () {
+		return that.now() - (that.now() - that.last) % interval;
+	};
+
+	this.get = function () {
+		var diff = ((lastTick() - tValue.last) / interval) >> 0;
+		var calc = tValue.val + (diff * rate);
+		return Math.max(min, Math.min(max, calc));
+	};
+
+	function tick() {
+		clearTimeout(ticker);
+		that.emit('tick', that.get());
+		ticker = setTimeout(tick, (interval - that.now() + lastTick()) * 1000);
+	}
+
+	// Detect if we're using something that has a setter, ie. tomes.
 	var hasSetFunction = typeof Object.getPrototypeOf(tSource).set === 'function';
 
 	function set(key, value) {
@@ -20,12 +42,11 @@ var TimedNumber = function (tSource, ticks) {
 			tValue.set(key, value);
 		} else {
 			tValue[key] = value;
+			if (ticks) {
+				tick();
+			}
 		}
 	}
-
-	this.now = function () {
-		return Date.now() / 1000 << 0;
-	};
 
 	var tValue = this.source = tSource;
 
@@ -35,26 +56,15 @@ var TimedNumber = function (tSource, ticks) {
 		set('last', 0);
 	}
 
-	var that = this;
 	this.last = tValue.last;
 	var max = this.max = tValue.hasOwnProperty('max') ? tValue.max : Infinity;
 	var min = this.min = tValue.hasOwnProperty('min') ? tValue.min : -Infinity;
 	var rate = this.rate = tValue.hasOwnProperty('rate') ? tValue.rate : 0;
 	var interval = this.interval = tValue.hasOwnProperty('interval') ? tValue.interval : 1;
 
-	var lastTick = this.lastTick = function () {
-		return that.now() - (that.now() - that.last) % interval;
-	};
-
 	if (!tValue.hasOwnProperty('val')) {
 		set('val', 0);
 	}
-
-	this.get = function () {
-		var diff = ((lastTick() - tValue.last) / interval) >> 0;
-		var calc = tValue.val + (diff * rate);
-		return Math.max(min, Math.min(max, calc));
-	};
 
 	this.set = function (value) {
 		var newVal = Math.max(min, Math.min(max, value));
@@ -67,16 +77,10 @@ var TimedNumber = function (tSource, ticks) {
 		this.set(this.get() + value);
 	};
 
-	var ticker;
-
-	function tick() {
-		clearTimeout(ticker);
-		that.emit('tick', that.get());
-		ticker = setTimeout(tick, (interval - that.now() + lastTick()) * 1000);
-	}
-
 	if (ticks) {
-		tValue.val.on('readable', tick);
+		if (hasSetFunction) {
+			tValue.val.on('readable', tick);
+		}
 		tick();
 	}
 

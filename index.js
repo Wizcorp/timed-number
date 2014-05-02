@@ -7,6 +7,8 @@ function inherits(Child, Parent) {
 }
 
 var TimedNumber = function (tSource, ticks) {
+	EventEmitter.call(this);
+
 	if (typeof tSource !== 'object') {
 		throw new Error('You must instantiate TimedNumber with an Object.');
 	}

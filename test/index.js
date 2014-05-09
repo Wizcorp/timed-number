@@ -55,8 +55,10 @@ describe('Timed Values', function () {
 		assert.equal(tvForce.get(), tForce.val);
 	})
 
-	it('Setting the value updates the last property to the current time received from the now function.', function () {
+	it('Setting the value from the max to something below the max updates the last property to the current time received from the now function.', function () {
 		tvForce.now = function () { return time; };
+		tvForce.set(3);
+		assert.equal(tvForce.get(), 3);
 		tvForce.set(0);
 		assert.equal(time, tForce.last);
 	});

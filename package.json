@@ -1,7 +1,7 @@
 {
     "name": "timed-number",
     "description": "A little wrapper to help deal with numbers that change over time.",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "author": "Wizcorp, Inc. <info@wizcorp.jp>",
     "maintainers": [
         { "name": "Bjorn Stromberg", "email": "bstromberg@wizcorp.jp" }

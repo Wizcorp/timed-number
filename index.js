@@ -25,7 +25,8 @@ var TimedNumber = function (tSource, ticks) {
 	};
 
 	this.get = function () {
-		var diff = ((lastTick() - tValue.last) / interval) >> 0;
+		// The diff must be positive
+		var diff = (Math.max(that.now() - tValue.last, 0) / interval) >> 0;
 		var calc = tValue.val + (diff * rate);
 		return Math.max(min, Math.min(max, calc));
 	};
@@ -33,7 +34,7 @@ var TimedNumber = function (tSource, ticks) {
 	function tick() {
 		clearTimeout(ticker);
 		that.emit('tick', that.get());
-		ticker = setTimeout(tick, (interval - that.now() + lastTick()) * 1000);
+		ticker = setTimeout(tick, ((that.now() - tValue.last) % interval) * 1000);
 	}
 
 	// Detect if we're using something that has a setter, ie. tomes.
@@ -69,10 +70,14 @@ var TimedNumber = function (tSource, ticks) {
 	}
 
 	this.set = function (value) {
+		var oldVal = this.get();
 		var newVal = Math.max(min, Math.min(max, value));
-		var newLast = this.now();
+
+		if (oldVal >= max && newVal < max) {
+			set('last', this.now());
+		}
+
 		set('val', newVal);
-		set('last', newLast);
 	};
 
 	this.inc = function (value) {

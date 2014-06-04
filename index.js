@@ -75,6 +75,8 @@ var TimedNumber = function (tSource, ticks) {
 
 		if (oldVal >= max && newVal < max) {
 			set('last', this.now());
+		} else {
+			set('last', lastTick());
 		}
 
 		set('val', newVal);

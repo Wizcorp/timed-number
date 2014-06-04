@@ -179,6 +179,22 @@ describe('ticks', function () {
 		var tvHP = new TimedNumber(hp);
 		assert.equal(tvHP.nextTick(), now + 10);
 	});
+
+	it('Keep last up to date.', function () {
+		var now = Date.now() / 1000 >> 0;
+		var hp = {
+			interval: 10,
+			last: now - 100,
+			max: 2000,
+			min: 0,
+			rate: 10, // 10 hp per 1s
+			val: 1000
+		};
+
+		var tvHP = new TimedNumber(hp);
+		tvHP.set(0);
+		assert.equal(tvHP.get(), 0);
+	});
 });
 
 describe('Ticking', function () {

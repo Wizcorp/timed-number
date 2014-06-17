@@ -2,7 +2,7 @@
   "name": "timed-number",
   "repo": "Wizcorp/timed-number",
   "description": "A little wrapper to help deal with numbers that change over time.",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "dependencies": {
     "Wizcorp/events": "0.1.2"
   },

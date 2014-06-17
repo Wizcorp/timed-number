@@ -43,7 +43,6 @@ var TimedNumber = function (tSource, ticks) {
 		that.emit('tick', val);
 
 		if (atLimit(val)) {
-			console.log('at limit', val, max, rate);
 			return;
 		}
 

@@ -31,10 +31,26 @@ var TimedNumber = function (tSource, ticks) {
 		return Math.max(min, Math.min(max, calc));
 	};
 
+	function atLimit(val) {
+		return (rate > 0 && val >= max) || (rate < 0 && val <= min);
+	}
+
 	function tick() {
 		clearTimeout(ticker);
-		that.emit('tick', that.get());
-		ticker = setTimeout(tick, ((that.now() - tValue.last) % interval) * 1000);
+
+		var val = that.get();
+
+		that.emit('tick', val);
+
+		if (atLimit(val)) {
+			return;
+		}
+
+		var diff = that.now() - tValue.last;
+		var secondsUntilNextTick = interval - (diff % interval);
+		var ms = secondsUntilNextTick * 1000;
+
+		ticker = setTimeout(tick, ms);
 	}
 
 	// Detect if we're using something that has a setter, ie. tomes.
@@ -51,15 +67,34 @@ var TimedNumber = function (tSource, ticks) {
 		}
 	}
 
+	this.set = function (value) {
+		var oldVal = this.get();
+		var newVal = Math.max(min, Math.min(max, value));
+
+		if (atLimit(oldVal) && !atLimit(newVal)) {
+			set('last', this.now());
+		} else {
+			set('last', lastTick());
+		}
+
+		set('val', newVal);
+	};
+
+	this.inc = function (amount) {
+		var val = this.get();
+
+		this.set(val + amount);
+	};
+
 	var tValue = this.source = tSource;
 
 	// Set up some sane default values.
 
 	if (!tValue.hasOwnProperty('last')) {
-		set('last', 0);
+		set('last', this.now());
 	}
 
-	this.last = tValue.last;
+	var last = this.last = tValue.last;
 	var max = this.max = tValue.hasOwnProperty('max') ? tValue.max : Infinity;
 	var min = this.min = tValue.hasOwnProperty('min') ? tValue.min : -Infinity;
 	var rate = this.rate = tValue.hasOwnProperty('rate') ? tValue.rate : 0;
@@ -69,26 +104,25 @@ var TimedNumber = function (tSource, ticks) {
 		set('val', 0);
 	}
 
-	this.set = function (value) {
-		var oldVal = this.get();
-		var newVal = Math.max(min, Math.min(max, value));
+	var tickScheduled = false;
 
-		if (oldVal >= max && newVal < max) {
-			set('last', this.now());
-		} else {
-			set('last', lastTick());
+	function scheduleTick() {
+		if (tickScheduled) {
+			return;
 		}
 
-		set('val', newVal);
-	};
+		tickScheduled = true;
 
-	this.inc = function (value) {
-		this.set(this.get() + value);
-	};
+		setTimeout(function () {
+			tickScheduled = false;
+			tick();
+		}, 0);
+	}
 
 	if (ticks) {
 		if (hasSetFunction) {
-			tValue.val.on('readable', tick);
+			tValue.val.on('readable', scheduleTick);
+			tValue.last.on('readable', scheduleTick);
 		}
 		tick();
 	}

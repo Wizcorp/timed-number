@@ -1,5 +1,9 @@
 ### History
 
+## v0.3.1
+
+* You should now specify your own time source when instantiating a timed number to avoid using the default for a brief period of time.
+
 ## v0.3.0
 
 * Fixed an issue where timed number was not ticking if the previous stored value and the new stored value were the same.

@@ -6,7 +6,7 @@ function inherits(Child, Parent) {
 	});
 }
 
-var TimedNumber = function (tSource, ticks) {
+var TimedNumber = function (tSource, ticks, now) {
 	EventEmitter.call(this);
 
 	if (typeof tSource !== 'object') {
@@ -16,7 +16,7 @@ var TimedNumber = function (tSource, ticks) {
 	var ticker;
 	var that = this;
 
-	this.now = function () {
+	this.now = now || function () {
 		return Date.now() / 1000 << 0;
 	};
 
